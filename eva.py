@@ -11,7 +11,7 @@ class ElectricityVendingSystem:
         print("Welcome to the Electricity Vending System!\n")
         print("This application allows you to conveniently manage your electricity usage and top up your meter.\n")
         print("**Before you begin, please note:**\n")
-        print("* This non-commercial simulation does not connect to real electricity grids.")
+        print("* This non-commercial simulation does not connect to real electricity grids.\n")
         print("* Meter IDs are virtual for this application.\n")
         print("**Ready to manage your electricity?**\n")
 
