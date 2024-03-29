@@ -1,5 +1,7 @@
-from meter import Meter
+import secrets
+import string
 
+from meter import Meter
 
 class ElectricityVendingSystem:
     def __init__(self):
@@ -55,31 +57,34 @@ class ElectricityVendingSystem:
                 nickname = f" ({meter.nickname})" if meter.nickname else ""
                 print(f"- {meter_id}{nickname}")
 
+    def generate_token(self, token_length=10):
+        characters = string.digits
+        token = ''.join(secrets.choice(characters) for _ in range(token_length))
+        return token
+
     def purchase_token(self):
         meter_id = self.get_meter_id("Enter the meter ID for the token purchase: ")
         if meter_id:
-            token_code = input("Enter the token code you purchased: ")
-            credit_amount = len(token_code) * 10
-            self.meters[meter_id].add_credit(credit_amount)
-            print(f"Token {token_code} applied successfully. ${credit_amount} added to meter {meter_id}.")
+            try:
+                amount = float(input("Enter the amount you want to pay: "))
+            except ValueError:
+                print("Invalid amount entered.")
+                return
 
-    def view_balance(self):
-        meter_id = self.get_meter_id("Select the meter to view the balance: ")
-        if meter_id:
-            balance = self.meters[meter_id].get_balance()
-            print(f"Current balance for meter {meter_id}: ${balance}")
+            token = self.generate_token()
+            self.meters[meter_id].add_token(token, amount)
+            print(f"Token {token} worth ${amount} has been generated for meter {meter_id}.")
 
-    def view_top_up_history(self):
-        meter_id = self.get_meter_id("Select the meter to view the top-up history: ")
+    def view_tokens(self):
+        meter_id = self.get_meter_id("Select the meter to view tokens: ")
         if meter_id:
-            history = self.meters[meter_id].get_top_up_history()
-            if not history:
-                print(f"No top-up history found for meter {meter_id}.")
+            tokens = self.meters[meter_id].get_tokens()
+            if not tokens:
+                print(f"No tokens found for meter {meter_id}.")
             else:
-                print(f"Top-up history for meter {meter_id}:")
-                for entry in history:
-                    amount, description = entry
-                    print(f"- ${amount} ({description})")
+                print(f"Tokens for meter {meter_id}:")
+                for token, amount in tokens.items():
+                    print(f"- Token: {token}, Amount: ${amount}")
 
     def get_meter_id(self, prompt):
         meter_id = input(prompt)
@@ -106,12 +111,11 @@ class ElectricityVendingSystem:
         while True:
             choice = self.get_user_choice("\n**Main Menu:**\n\n"
                                            "1. Meter Management\n"
-                                           "2. Purchase with Token\n"
-                                           "3. View Credit Balance\n"
-                                           "4. View Top-up History\n"
-                                           "5. Learn About Electricity Tariffs\n"
-                                           "6. Exit\n\n"
-                                           "Enter your choice: ", ["1", "2", "3", "4", "5", "6"])
+                                           "2. Purchase Token\n"
+                                           "3. View Tokens\n"
+                                           "4. Learn About Electricity Tariffs\n"
+                                           "5. Exit\n\n"
+                                           "Enter your choice: ", ["1", "2", "3", "4", "5"])
 
             if choice == "1":
                 meter_choice = self.get_user_choice("\n**Meter Management:**\n\n"
@@ -133,14 +137,11 @@ class ElectricityVendingSystem:
                 self.purchase_token()
 
             elif choice == "3":
-                self.view_balance()
+                self.view_tokens()
 
             elif choice == "4":
-                self.view_top_up_history()
-
-            elif choice == "5":
                 self.display_tariffs()
 
-            elif choice == "6":
+            elif choice == "5":
                 print("Thank you for using the Electricity Vending System. Goodbye!")
                 break
