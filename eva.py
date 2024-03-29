@@ -26,9 +26,9 @@ class ElectricityVendingSystem:
         if meter_id in self.meters:
             print("Meter ID already exists.")
         else:
-            nickname = input("Enter a nickname for the meter (optional): ")
+            nickname = input("Enter a nickname for the meter (Optional): ")
             self.meters[meter_id] = Meter(meter_id, nickname)
-            print(f"Meter {meter_id} created successfully.")
+            print(f"Meter {meter_id} created successfully!")
 
     def update_meter(self):
         meter_id = self.get_meter_id("Select the meter you want to update: ")
