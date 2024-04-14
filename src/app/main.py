@@ -1,6 +1,5 @@
 from src.app import ElectricityVendingSystem, get_user_choice, get_meter_id
 
-
 def welcome_message():
     print("Welcome to the Electricity Vending System!\n")
     print("This application allows you to conveniently manage your electricity usage and top up your meter.\n")
@@ -40,7 +39,7 @@ def run():
             system.view_tokens(meter_id)
 
         elif choice == "3":
-            print("Thank you for using the Electricity Vending System. Goodbye!")
+            print("\033[92mThank you for using the Electricity Vending System. Goodbye!\033[92m")
             system.close()
             break
 
