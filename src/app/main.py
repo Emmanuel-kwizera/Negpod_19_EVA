@@ -30,7 +30,7 @@ def run():
             try:
                 amount = float(input("Enter the amount you want to pay: "))
             except ValueError:
-                print("Invalid amount entered.")
+                print("\033[91mInvalid amount entered.\033[0m")
                 continue
             system.purchase_token(meter_id, amount)
 
@@ -39,7 +39,7 @@ def run():
             system.view_tokens(meter_id)
 
         elif choice == "3":
-            print("\033[92mThank you for using the Electricity Vending System. Goodbye!\033[92m")
+            print("\033[92mThank you for using the Electricity Vending System. Goodbye!\033[0m")
             system.close()
             break
 
