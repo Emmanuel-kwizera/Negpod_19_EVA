@@ -13,7 +13,7 @@ def run():
     welcome_message()
     start = get_user_choice("Enter Y to continue or N to exit: ", ["Y", "N"])
     if start == "N":
-        print("Goodbye!")
+        print("\033[92mGoodbye!\033[0m")
         return
 
     system = ElectricityVendingSystem()
