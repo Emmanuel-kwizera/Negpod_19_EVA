@@ -1,6 +1,6 @@
 # Electric Vending System
 
-Welcome to the Electricity Vending System!
+Welcome to the Electricity Vending System!!
 
 This application allows you to conveniently manage your electricity usage and top up your meter.
 
