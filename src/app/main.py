@@ -1,48 +1,46 @@
-from src.app import ElectricityVendingSystem, get_user_choice, get_meter_id
-
-def welcome_message():
-    print("Welcome to the Electricity Vending System!\n")
-    print("This application allows you to conveniently manage your electricity usage and top up your meter.\n")
-    print("**Before you begin, please note:**\n")
-    print("* This non-commercial simulation does not connect to real electricity grids.")
-    print("* Meter IDs are virtual for this application.\n")
-    print("**Ready to manage your electricity?**\n")
+from src.app import Meter, ElectricityVendingSystem
+from src.app.token import Token
+from src.database import DatabaseConnection
 
 
-def run():
-    welcome_message()
-    start = get_user_choice("Enter Y to continue or N to exit: ", ["Y", "N"])
-    if start == "N":
-        print("\033[92mGoodbye!\033[0m")
-        return
-
+def main():
+    connection = DatabaseConnection()
     system = ElectricityVendingSystem()
+    meter = Meter(connection)
+    token = Token(connection)
 
     while True:
-        choice = get_user_choice("\n**Main Menu:**\n\n"
-                                 "1. Purchase Token\n"
-                                 "2. View Tokens\n"
-                                 "3. Exit\n\n"
-                                 "Enter your choice: ", ["1", "2", "3"])
+        choice = system.main_menu()
+        if choice == 1:
+            meter.worker()
+        elif choice == 2:
+            token.purchase_electricity()
+        elif choice == 3:
+            token_code = input("Enter token: ")
+            tk = token.find_by_token_id(token_code)
+            id, meter_number, amount, token_code, created_at, electricity_units = tk
+            if tk is not None:
+                meter.update_meter_balance(meter_number, electricity_units)
+                print(f"Token {token_code} worth {amount} RWF has been loaded.")
+                print(f"Units added: {electricity_units} KwH")
+            else:
+                print("Token not found.")
 
-        if choice == "1":
-            meter_id = get_meter_id("Enter the meter ID for the token purchase: ")
-            try:
-                amount = float(input("Enter the amount you want to pay: "))
-            except ValueError:
-                print("\033[91mInvalid amount entered.\033[0m")
-                continue
-            system.purchase_token(meter_id, amount)
+        elif choice == 4:
+            meter_info = meter.find_by_meter_number()
+            Meter.display_meter_info(meter_info)
 
-        elif choice == "2":
-            meter_id = get_meter_id("Select the meter to view tokens: ")
-            system.view_tokens(meter_id)
-
-        elif choice == "3":
-            print("\033[92mThank you for using the Electricity Vending System. Goodbye!\033[0m")
-            system.close()
+        elif choice == 5:
+            system.help_submenu()
+            pass
+        elif choice == 6:
+            print("Exiting...")
             break
+        else:
+            print("Invalid choice. Please try again.")
+
+    print("Thank you for using the Electricity Vending System!")
 
 
 if __name__ == "__main__":
-    run()
+    main()
