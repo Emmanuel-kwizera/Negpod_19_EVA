@@ -5,5 +5,5 @@ def get_user_choice(message, valid_choices):
     return choice
 
 
-def get_meter_id(prompt):
+def get_id(prompt):
     return input(prompt)
