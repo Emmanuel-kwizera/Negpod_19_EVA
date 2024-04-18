@@ -1,59 +1,43 @@
 import mysql.connector
+from threading import local
 
 from src.app import Meter
 from src.config.settings import DB_HOST, DB_USER, DB_PASSWORD, DB_NAME
 
 
 class DatabaseConnection:
+    _connection_pool = local()
+
     def __init__(self):
         self.connection = None
 
-    def connect(self):
-        self.connection = mysql.connector.connect(
-            host=DB_HOST,
-            user=DB_USER,
-            password=DB_PASSWORD,
-            database=DB_NAME
-        )
+    @classmethod
+    def get_connection(cls):
+        if not hasattr(cls._connection_pool, "conn"):
+            cls._connection_pool.conn = mysql.connector.connect(
+                host=DB_HOST,
+                database=DB_NAME,
+                user=DB_USER,
+                password=DB_PASSWORD
+            )
+            print("Connected to MySQL database successfully!")
+        return cls._connection_pool.conn
+
+    def close_connection(self):
+        # No need to close the connection here, managed by pool
+        pass
 
     def execute_query(self, query, params=None):
-        cursor = self.connection.cursor()
-        cursor.execute(query, params)
-        return cursor
-
-    def commit(self):
-        self.connection.commit()
-
-    def close(self):
-        if self.connection:
-            self.connection.close()
-
-
-class DatabaseManager:
-    def __init__(self):
-        self.db = DatabaseConnection()
-        self.db.connect()
-
-    def get_meter(self, meter_id):
-        query = "SELECT meter_id, nickname, tokens FROM meters WHERE meter_id = %s"
-        cursor = self.db.execute_query(query, (meter_id,))
-        row = cursor.fetchone()
-        if row:
-            meter_id, nickname, tokens = row
-            return Meter(meter_id, nickname, eval(tokens))
-        else:
-            return Meter(meter_id, "", {})
-
-    def save_meter(self, meter):
-        query = "INSERT INTO meters (meter_id, nickname, tokens) VALUES (%s, %s, %s) ON DUPLICATE KEY UPDATE nickname = %s, tokens = %s"
-        tokens = str(meter.tokens)
-        self.db.execute_query(query, (meter.meter_id, meter.nickname, tokens, meter.nickname, tokens))
-        self.db.commit()
-
-    def save_token(self, token, amount, meter_id):
-        query = "INSERT INTO tokens (token, amount, meter_id) VALUES (%s, %s, %s)"
-        self.db.execute_query(query, (token, amount, meter_id))
-        self.db.commit()
-
-    def close(self):
-        self.db.close()
+        connection = self.get_connection()
+        cursor = connection.cursor()
+        try:
+            if params:
+                cursor.execute(query, params)
+            else:
+                cursor.execute(query)
+            return cursor.fetchall()
+        except mysql.connector.Error as err:
+            print(f"Error executing query: {err}")
+            return None
+        finally:
+            cursor.close()
